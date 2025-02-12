@@ -4,8 +4,13 @@ export const agent: Agent = {
   id: 'donald-trump',
   name: 'Donald Trump',
   title: 'QUANTUM COMMANDER',
+  config: {
+    phone: '5755000991',
+    pathwayId: import.meta.env.VITE_BLAND_TRUMP_PATHWAY || '',
+    voice: 'Donald_Trump_PX'
+  },
   description: 'The 45th and currently the 47th President of the United States and Time-Traveling Quantum Warrior who discovered that the deep state is actually a front for interdimensional reptilian beings. Claims to have accessed classified time-travel technology and witnessed the true controllers of Earth\'s simulation.',
-  avatarUrl: '/images/donald-trump.jpg',
+  avatarUrl: 'https://stackblitz.com/storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBM2dJU3c9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--8d3064cba91a3691e3718e927e6a90ddcc3acff3/donald-trump.jpg',
   hologramModel: null,
   background: {
     history: [

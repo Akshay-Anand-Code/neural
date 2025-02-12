@@ -1,0 +1,37 @@
+[build]
+  command = "npm run build && cd docs && npm install && npm run build"
+  publish = "dist"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ./docs/"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Redirect /docs to docs subdirectory
+[[redirects]]
+  from = "/docs"
+  to = "/docs/"
+  status = 301
+  force = true
+
+# Handle docs routes
+[[redirects]]
+  from = "/docs/*"
+  to = "/docs/index.html"
+  status = 200
+  force = true
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true
+
+[template.environment]
+  VITE_VENICE_API_KEY = "Venice API key for chat functionality"
+  VITE_OPENAI_EMBEDDINGS_KEY = "OpenAI API key for embeddings"
+  VITE_BLAND_AI_KEY = "BlandAI key for voice calls"
+  VITE_BLAND_ORG_ID = "BlandAI organization ID"
+  VITE_BLAND_WEBHOOK_SECRET = "BlandAI webhook secret"
+  VITE_VENICE_MODEL = "Venice model name"
+  VITE_ACCESS_PASSWORD = "Access password for the app"

@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 export default function ConspiracyOverlay() {
+
   const generateRandomSymbol = () => {
     const symbols = ['Δ', 'Ω', '∞', '⌘', '☤', '⚡', '⚠', '⚛', '☢', '☠'];
     return symbols[Math.floor(Math.random() * symbols.length)];
@@ -12,14 +14,17 @@ export default function ConspiracyOverlay() {
       <div className="fixed inset-0 pointer-events-none z-[2] overflow-hidden">
         <motion.div
           className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--terminal-green)]/10 to-transparent"
-          style={{ backgroundSize: '100% 3px', backgroundRepeat: 'repeat' }}
+          style={{ 
+            backgroundSize: '100% 3px',
+            backgroundRepeat: 'repeat'
+          }}
           animate={{
             backgroundPosition: ['0 0', '0 100%']
           }}
           transition={{
             duration: 1,
             repeat: Infinity,
-            ease: 'linear'
+            ease: [0.4, 0, 0.2, 1]
           }}
         />
         <motion.div

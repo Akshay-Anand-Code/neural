@@ -18,7 +18,7 @@ A futuristic web application that enables users to interact with AI-powered digi
   - Real-time chat interface
 
 - **Technical Features**
-  - DeepSeek AI integration
+  - Venice.ai integration
   - OpenAI embeddings for context
   - IndexedDB for chat persistence
   - WebGL-powered 3D graphics
@@ -34,7 +34,7 @@ A futuristic web application that enables users to interact with AI-powered digi
   - Lucide React icons
 
 - **AI/ML**
-  - DeepSeek Chat API
+  - Venice.ai Chat API
   - OpenAI Embeddings API
   - Custom prompt engineering
   - Semantic analysis
@@ -49,7 +49,7 @@ A futuristic web application that enables users to interact with AI-powered digi
 1. Clone the repository
 2. Copy `.env.example` to `.env` and add your API keys:
    ```bash
-   VITE_DEEPSEEK_API_KEY=your_deepseek_api_key
+   VITE_VENICE_API_KEY=your_venice_api_key
    VITE_OPENAI_EMBEDDINGS_KEY=your_openai_embeddings_key
    ```
 3. Install dependencies:
@@ -80,7 +80,7 @@ src/
 
 Required environment variables:
 
-- `VITE_DEEPSEEK_API_KEY`: Your DeepSeek API key for AI chat
+- `VITE_VENICE_API_KEY`: Your Venice.ai API key for AI chat
 - `VITE_OPENAI_EMBEDDINGS_KEY`: Your OpenAI API key for embeddings
 
 ## 🎮 Features in Development

@@ -77,7 +77,7 @@ class DatabaseService {
 
   // User methods
   async createUser(userId: string) {
-    await this.transaction(['users'], 'readwrite', async (store) => {
+    await this.transaction('users', 'readwrite', async (store) => {
       return new Promise((resolve, reject) => {
         const request = store.put({ id: userId, createdAt: new Date() });
         request.onsuccess = () => resolve(undefined);
@@ -89,7 +89,7 @@ class DatabaseService {
   // Conversation methods
   async createConversation(userId: string, agentId: string): Promise<string> {
     const conversationId = crypto.randomUUID();
-    await this.transaction(['conversations'], 'readwrite', async (store, transaction) => {
+    await this.transaction('conversations', 'readwrite', async (store, transaction) => {
       return new Promise((resolve, reject) => {
         const request = store.put({
           id: conversationId,
@@ -107,7 +107,7 @@ class DatabaseService {
   // Message methods
   async addMessage(conversationId: string, content: string, type: 'user' | 'agent') {
     const messageId = crypto.randomUUID();
-    await this.transaction(['messages'], 'readwrite', async (store, transaction) => {
+    await this.transaction('messages', 'readwrite', async (store, transaction) => {
       return new Promise((resolve, reject) => {
         const request = store.put({
           id: messageId,
@@ -123,7 +123,7 @@ class DatabaseService {
   }
 
   async getConversationHistory(userId: string, agentId: string): Promise<Message[]> {
-    return this.transaction(['conversations', 'messages'], 'readonly', async (store, transaction) => {
+    return this.transaction('conversations', 'readonly', async (_, transaction) => {
       return new Promise((resolve, reject) => {
         const conversationsStore = transaction.objectStore('conversations');
         const conversationIndex = conversationsStore.index('userAgent');

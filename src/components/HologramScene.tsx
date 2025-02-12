@@ -1,10 +1,9 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
-import { useLoader, useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { Suspense, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useAgentStore } from '../store/useAgentStore';
-import { useState } from 'react';
 
 function RotatingStars() {
   const starsRef = useRef<THREE.Group>(null);
@@ -46,15 +45,20 @@ export default function HologramScene() {
   if (!selectedAgent) return null;
 
   return (
-    <div className="w-full h-full bg-[var(--terminal-dark)]/90 rounded-lg overflow-hidden relative z-[4] terminal-border crt">
+    <div className="w-full h-full bg-[var(--terminal-dark)]/85 rounded-lg overflow-hidden relative z-[4] terminal-border crt flex flex-col">
       <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/5 via-transparent to-transparent" />
-      <Canvas 
-        camera={{ position: [0, 12, 0], fov: 75 }}
-        gl={{ antialias: true }}
-        dpr={[1, 2]}
-        performance={{ min: 0.5 }}
-      >
-        <ambientLight intensity={0.5} />
+      <div className="flex-1 relative">
+        <Canvas
+          camera={{ position: [0, 12, 0], fov: 75 }}
+          gl={{ 
+            antialias: true,
+            powerPreference: 'high-performance'
+          }}
+          dpr={[1, 2]}
+          style={{ position: 'absolute', inset: 0 }}
+          frameloop="demand"
+        >
+        <ambientLight intensity={0.3} />
         <pointLight position={[10, 10, 10]} intensity={1.5} />
         <pointLight position={[-10, -10, -10]} intensity={0.5} />
         <Suspense fallback={null}>
@@ -66,8 +70,10 @@ export default function HologramScene() {
           enablePan={false}
           minPolarAngle={0}  // Allow full vertical rotation
           maxPolarAngle={Math.PI} // Allow full vertical rotation
-          rotateSpeed={0.3}
+          rotateSpeed={0.5}
           target={[0, 12, 0]} // Set target point to match camera height
+          enableDamping={true}
+          dampingFactor={0.05}
         />
         <fog attach="fog" args={['#000', 10, 30]} />
         
@@ -76,12 +82,13 @@ export default function HologramScene() {
           <meshStandardMaterial
             color="#00ffff"
             transparent
-            opacity={0.1}
+            opacity={0.05}
             metalness={0.8}
             roughness={0.2}
           />
         </mesh>
-      </Canvas>
+        </Canvas>
+      </div>
       
       <div className="absolute top-2 left-2 text-[var(--terminal-green)]/80 font-mono text-xs uppercase">
         <div>PROJECT X OS v0.0.1</div>

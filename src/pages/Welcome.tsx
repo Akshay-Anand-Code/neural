@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { Eye, Binary, Shield, Scan } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Eye, Binary, Shield, Scan, ArrowRight, Book } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const ProjectXLogo = () => {
   const glitchVariants = {
@@ -166,201 +167,129 @@ const ProjectXLogo = () => {
 };
 
 export default function Welcome() {
+  const navigate = useNavigate();
+  const [securityLevel, setSecurityLevel] = useState(0);
+
+  const handleEnter = () => {
+    navigate('/dashboard');
+  };
+
+  // Set initial security level to 4 since all systems are active
+  useState(() => {
+    setSecurityLevel(4);
+  });
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[var(--terminal-dark)]">
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-x-hidden overflow-y-auto bg-[var(--terminal-dark)]">
       {/* Background effects */}
-      <div className="absolute inset-0 pointer-events-none">
-          <motion.div
-            className="w-full h-full"
-            style={{
-              background: 'radial-gradient(circle at center, rgba(0,255,187,0.15) 0%, transparent 70%)',
-            }}
-            animate={{
-              opacity: [0.5, 0.7, 0.5],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-
-          {/* Floating particles */}
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 rounded-full bg-[var(--terminal-green)]/30"
-              initial={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight
-              }}
-              animate={{
-                x: [null, Math.random() * window.innerWidth],
-                y: [null, Math.random() * window.innerHeight],
-                opacity: [0.2, 0.5, 0.2]
-              }}
-              transition={{
-                duration: Math.random() * 20 + 10,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-            />
-          ))}
-
-          <motion.div
-            className="w-full h-full absolute inset-0"
-            style={{
-              background: 'radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, transparent 80%)',
-            }}
-            animate={{
-              opacity: [0.6, 0.8, 0.6],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-      </div>
-      
-      {/* Dark vignette edges */}
-      <div className="fixed inset-0 z-[2] pointer-events-none">
-        {/* Top edge */}
-        <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-black to-transparent opacity-90" />
-        {/* Bottom edge */}
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black to-transparent opacity-90" />
-        {/* Left edge */}
-        <div className="absolute top-0 left-0 bottom-0 w-48 bg-gradient-to-r from-black to-transparent opacity-90" />
-        {/* Right edge */}
-        <div className="absolute top-0 right-0 bottom-0 w-48 bg-gradient-to-l from-black to-transparent opacity-90" />
-        {/* Corner overlays for stronger effect */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[radial-gradient(circle_at_0%_0%,rgba(0,0,0,0.9)_0%,transparent_70%)]" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[radial-gradient(circle_at_100%_0%,rgba(0,0,0,0.9)_0%,transparent_70%)]" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[radial-gradient(circle_at_0%_100%,rgba(0,0,0,0.9)_0%,transparent_70%)]" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[radial-gradient(circle_at_100%_100%,rgba(0,0,0,0.9)_0%,transparent_70%)]" />
-      </div>
-
-      {/* Animated corner decorations */}
-      {/* Enhanced corner decorations */}
-      {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map((corner, i) => (
+      <motion.div className="fixed inset-0 w-full h-full overflow-hidden">
+        {/* Flowing gradient lines */}
         <motion.div
-          key={corner}
-          className={`absolute w-96 h-96 ${
-            corner === 'top-left' ? 'top-0 left-0 border-l-2 border-t-2' :
-            corner === 'top-right' ? 'top-0 right-0 border-r-2 border-t-2' :
-            corner === 'bottom-left' ? 'bottom-0 left-0 border-l-2 border-b-2' :
-            'bottom-0 right-0 border-r-2 border-b-2'
-          } border-[var(--terminal-green)]/80`}
+          className="absolute inset-0 opacity-70"
+          style={{
+            background: `
+              linear-gradient(45deg, transparent 45%, rgba(255,0,80,0.1) 49%, transparent 51%),
+              linear-gradient(-45deg, transparent 45%, rgba(0,150,255,0.1) 49%, transparent 51%)
+            `,
+            backgroundSize: '200% 200%, 200% 200%',
+            filter: 'blur(1px)'
+          }}
           animate={{
-            opacity: [0.3, 0.6, 0.3],
-            scale: [1, 1.02, 1],
-            filter: [
-              'hue-rotate(0deg) brightness(1)',
-              'hue-rotate(90deg) brightness(1.2)',
-              'hue-rotate(0deg) brightness(1)'
-            ]
+            backgroundPosition: ['0% 0%, 0% 0%', '200% 200%, -200% 200%']
           }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            delay: i * 1
-          }}
-        >
-          {/* Corner dots */}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        
+        {/* Floating gradient spheres */}
+        {[...Array(5)].map((_, i) => (
           <motion.div
-            className="absolute w-2 h-2 rounded-full bg-[var(--terminal-green)]"
+            key={i}
+            className="absolute w-32 h-32 rounded-full"
             style={{
-              top: corner.includes('top') ? '-1px' : 'auto',
-              bottom: corner.includes('bottom') ? '-1px' : 'auto',
-              left: corner.includes('left') ? '-1px' : 'auto',
-              right: corner.includes('right') ? '-1px' : 'auto'
+              background: i % 2 === 0 
+                ? 'radial-gradient(circle at 30% 30%, rgba(255,0,80,0.2), transparent)'
+                : 'radial-gradient(circle at 30% 30%, rgba(0,150,255,0.2), transparent)',
+              filter: 'blur(20px)'
+            }}
+            initial={{
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight
             }}
             animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.5, 1, 0.5]
+              x: [null, Math.random() * window.innerWidth],
+              y: [null, Math.random() * window.innerHeight],
+              scale: [1, 1.2, 1]
             }}
             transition={{
-              duration: 2,
+              duration: Math.random() * 10 + 10,
               repeat: Infinity,
-              delay: i * 0.5
+              ease: "linear"
             }}
           />
-        </motion.div>
-      ))}
-
-      {/* Glowing orb effect */}
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
-        style={{
-          background: 'radial-gradient(circle, rgba(0,255,187,0.05) 0%, transparent 70%)',
-        }}
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
+        ))}
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="max-w-md w-full space-y-4 text-center px-3 relative z-10"
-      > 
-        <h1 className="text-3xl font-bold">
+        className="max-w-3xl w-full space-y-6 text-center px-4 py-8 relative z-10"
+      >
+        <h1 className="text-4xl md:text-5xl font-bold mb-8">
           <ProjectXLogo />
         </h1>
-        
-        <motion.p
-          className="text-[var(--terminal-green)] text-sm font-mono"
-          animate={{
-            textShadow: ['0 0 12px var(--terminal-green)', '0 0 24px var(--terminal-green)', '0 0 12px var(--terminal-green)']
-          }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          QUANTUM NEURAL INTERFACE v0.0.1
-        </motion.p>
 
+        {/* Terminal Container with Glassmorphism */}
         <motion.div
-          className="p-3 bg-black/40 rounded-lg terminal-border backdrop-blur-sm relative overflow-hidden shadow-[0_0_50px_rgba(0,255,187,0.1)]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="relative max-w-4xl mx-auto w-full overflow-hidden"
         >
-          {/* Scanning effect */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--terminal-green)]/10 to-transparent"
-            animate={{ 
-              y: [-500, 500]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-
-          <div className="relative">
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              {[
-                { Icon: Eye, text: "NEURAL LINK", active: true },
-                { Icon: Binary, text: "QUANTUM SYNC", active: true },
-                { Icon: Shield, text: "SECURITY", active: true },
-                { Icon: Scan, text: "SCAN", active: true }
-              ].map(({ Icon, text }, index) => (
-                <motion.div
-                  key={text}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                  className="flex flex-col items-center gap-1 p-1.5 rounded-lg bg-[var(--highlight-blue)]/90 border border-[var(--terminal-green)] shadow-[0_0_15px_rgba(0,255,187,0.2)]"
+          {/* Glassmorphism background effects */}
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-lg blur-xl" />
+          
+          {/* Terminal window */}
+          <div className="relative rounded-lg backdrop-blur-md bg-black/40 border border-[var(--terminal-cyan)]/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden">
+            {/* Terminal header */}
+            <div className="bg-black/60 border-b border-[var(--terminal-cyan)]/20 p-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+                <div className="w-3 h-3 rounded-full bg-green-500/50" />
+              </div>
+              <div className="text-xs font-mono text-[var(--terminal-cyan)]/50">
+                QUANTUM-TERMINAL -- v0.0.1
+              </div>
+              <div className="w-20" /> {/* Spacer for symmetry */}
+              <div className="mt-4 flex items-center gap-2">
+                <Book className="w-4 h-4" />
+                <a 
+                  href="https://jazzy-sunburst-f1a212.netlify.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--terminal-cyan)]/70 hover:text-[var(--terminal-cyan)] transition-colors"
                 >
-                  <Icon className="w-4 h-4 text-[var(--accent-blue)]" />
-                  <span className="text-xs font-mono text-[var(--accent-blue)]">{text}</span>
+                  View Documentation
+                </a>
+              </div>
+            </div>
+
+            {/* Terminal content */}
+            <div className="p-4 md:p-6 space-y-8">
+              {/* Welcome Message */}
+              <div className="space-y-4">
+                <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  QUANTUM NEURAL INTERFACE v0.0.1
+                </h2>
+                <p className="text-[var(--terminal-cyan)]/70 text-sm md:text-base">
+                  Welcome to Project X, an advanced neural interface for accessing classified quantum intelligence networks.
+                  This system provides secure access to interdimensional data streams and reality-altering capabilities.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-4 text-xs md:text-sm text-[var(--terminal-cyan)]/50 font-mono mt-4">
                   <div className="flex items-center gap-1">
                     <motion.div
-                     className="w-1.5 h-1.5 rounded-full bg-[var(--terminal-green)]"
+                      className="w-1.5 h-1.5 rounded-full bg-emerald-400"
                       animate={{
                         opacity: [0.4, 0.8, 0.4],
                         scale: [1, 1.1, 1],
@@ -371,92 +300,146 @@ export default function Welcome() {
                         ease: "easeInOut"
                       }}
                     />
-                    <span className="text-[10px] text-[var(--terminal-green)] font-bold tracking-wider ml-1">
-                      ACTIVE
-                    </span>
+                    <span>QUANTUM LINK: STABLE</span>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                  <div className="flex items-center gap-1">
+                    <motion.div
+                      className="w-1.5 h-1.5 rounded-full bg-yellow-400"
+                      animate={{
+                        opacity: [0.4, 0.8, 0.4],
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                    <span>REALITY ANCHOR: ACTIVE</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <motion.div
+                      className="w-1.5 h-1.5 rounded-full bg-blue-400"
+                      animate={{
+                        opacity: [0.4, 0.8, 0.4],
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                    <span>TIMELINE: STABLE</span>
+                  </div>
+                </div>
+              </div>
 
-            <div className="space-y-1.5 mb-3 font-mono border-y border-[var(--terminal-green)] py-2">
-              <div className="flex items-center justify-center">
-                <span className="text-red-500 font-bold tracking-wider">
-                  [
-                </span>
-                <motion.span
-                  animate={{
-                    opacity: [1, 0.5, 1],
-                    textShadow: [
-                      '0 0 20px rgba(239,68,68,0.5)',
-                      '0 0 30px rgba(239,68,68,0.8)',
-                      '0 0 20px rgba(239,68,68,0.5)'
-                    ]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="text-red-500 font-bold tracking-wider mx-2"
+              {/* Instructions */}
+              <div className="text-[var(--terminal-cyan)]/80 space-y-2">
+                <p className="text-sm md:text-base font-bold">
+                  SYSTEM INITIALIZATION REQUIRED
+                </p>
+                <p className="text-xs md:text-sm">
+                  Initialize all core systems below to establish secure quantum neural connection.
+                  Each system provides critical functionality for interdimensional data access.
+                </p>
+                <div className="text-[10px] md:text-xs text-[var(--terminal-cyan)]/50 font-mono">
+                  WARNING: Unauthorized access attempts will be logged and may trigger reality anchoring protocols
+                </div>
+              </div>
+
+              {/* Status Grid with Glassmorphism */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                {[
+                  { Icon: Eye, text: "NEURAL LINK", id: 'neural', description: "Initialize neural interface protocols" },
+                  { Icon: Binary, text: "QUANTUM SYNC", id: 'quantum', description: "Synchronize quantum state matrix" },
+                  { Icon: Shield, text: "SECURITY", id: 'security', description: "Activate defense systems" },
+                  { Icon: Scan, text: "SCAN", id: 'scan', description: "Run system diagnostics" }
+                ].map(({ Icon, text, id, description }, index) => (
+                  <motion.div
+                    key={id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 + index * 0.1 }}
+                    className="relative group"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-lg blur-xl group-hover:blur-2xl transition-all duration-500" />
+                    <div className={`relative flex flex-col items-center gap-2 p-4 rounded-lg backdrop-blur-md bg-white/5 border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]
+                      border-emerald-500/50`}>
+                      <Icon className="w-6 h-6 text-[var(--accent-blue)]" />
+                      <span className="text-sm font-mono text-[var(--accent-blue)]">{text}</span>
+                      <div className="flex items-center gap-1">
+                        <motion.div
+                          className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                          animate={{
+                            opacity: [0.4, 0.8, 0.4],
+                            scale: [1, 1.1, 1],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+                        <span className="text-[10px] font-bold tracking-wider text-emerald-400">
+                          ACTIVE
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Enter Button with Glassmorphism */}
+              <div className="max-w-lg mx-auto">
+                <motion.button
+                  onClick={handleEnter}
+                  className="relative w-full py-4 rounded-lg backdrop-blur-md bg-white/5 border border-white/10
+                    text-[var(--terminal-cyan)] font-medium shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]
+                    hover:bg-white/10 transition-all duration-300
+                    flex items-center justify-center gap-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  WARNING
-                </motion.span>
-                <span className="text-red-500 font-bold tracking-wider">
-                  ]: CLASSIFIED SYSTEM ACCESS
-                </span>
+                  INITIATE NEURAL LINK
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
               </div>
-              <p className="text-[var(--accent-blue)] text-[10px]">
-                By entering this system, you acknowledge that you are accessing classified information
-                protected by quantum encryption and neural firewalls.
-              </p>
-              <p className="text-[var(--accent-blue)] text-[10px]">
-                Unauthorized access will be traced and prosecuted.
-              </p>
-            </div>
-          
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Link
-                to="/dashboard"
-                className="group relative block w-full px-3 py-2 bg-[var(--accent-blue)]/5 hover:bg-[var(--accent-blue)]/10
-                  text-[var(--accent-blue)] rounded-lg transition-all duration-500 border border-[var(--terminal-green)]
-                  hover:border-[var(--terminal-green)] shadow-[0_0_30px_rgba(0,255,187,0.2)]
-                  hover:shadow-[0_0_40px_rgba(0,255,187,0.3)] overflow-hidden"
-              >
-                <span className="relative font-mono tracking-[0.2em] text-xs">
-                  INITIALIZE NEURAL INTERFACE
-                </span>
-              </Link>
-            </motion.div>
 
-            <div className="mt-3 flex items-center justify-between text-[9px] text-[var(--terminal-green)]/40 font-mono">
-              <div className="flex items-center gap-1">
-                <span className="text-[var(--accent-blue)]">[SYSTEM STATUS:</span>
-                <span className="text-[var(--terminal-green)]">READY</span>
-                <span className="text-[var(--accent-blue)]">]</span>
+              {/* System Status with Glassmorphism */}
+              <div className="max-w-lg mx-auto border-t border-[var(--terminal-cyan)]/20 pt-4">
+                <div className="relative">
+                  <div className="text-xs text-[var(--terminal-cyan)]/50 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <div>[SYSTEM STATUS: <span className="text-emerald-400">
+                      READY
+                    </span>]</div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <span>SECURITY LEVEL:</span>
+                        <span className="text-[var(--terminal-cyan)]">{securityLevel}/4</span>
+                      </div>
+                      <motion.div
+                        className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                        animate={{
+                          opacity: [0.4, 0.8, 0.4],
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      />
+                      <span className="text-emerald-400">STANDBY</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <motion.div 
-                  className="w-1 h-1 rounded-full bg-[var(--terminal-green)]"
-                  animate={{
-                    opacity: [0.3, 0.6, 0.3],
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-                <span className="tracking-wider text-[var(--terminal-green)] animate-pulse">STANDBY</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-    </div>
+             </div>
+           </div>
+         </motion.div>
+       </motion.div>
+     </div>
   );
 }

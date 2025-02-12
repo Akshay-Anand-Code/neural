@@ -1,4 +1,9 @@
-import type { AICharacter } from './galadriel';
+interface AICharacter {
+  id: string;
+  name: string;
+  personality: string;
+  traits: string[];
+}
 
 const SIMILARITY_THRESHOLD = 0.8;
 
@@ -32,5 +37,5 @@ export function enhancePrompt(
   // 2. Find similar contexts using cosine similarity
   // 3. Include relevant context in the enhanced prompt
   
-  return message; // For now, return the original message
+  return message;
 }

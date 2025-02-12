@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Send, Phone, PhoneOff, Loader2, Bot, User } from 'lucide-react';
+import { Send, Phone, PhoneOff, Loader2, Bot, User, PhoneOff as PhoneOffIcon } from 'lucide-react';
 import PhoneModal from './PhoneModal';
 import { motion } from 'framer-motion';
 import { useAgentStore } from '../store/useAgentStore';
 import { formatDate } from '../utils/formatDate';
-
 import { AnimatePresence } from 'framer-motion';
 import type { Message } from '../types/agent';
 
@@ -27,7 +26,7 @@ const MessageBubble = ({ message, isFirst }: { message: Message; isFirst: boolea
     >
       {isFirst && (
         <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center relative
-          ${isUser ? 'bg-cyan-500/20' : message.content.includes('[AGENT PROFILE]') ? 'bg-[var(--accent-blue)]/20' : 'bg-emerald-500/20'}`}>
+          ${isUser ? 'bg-cyan-500/20' : message.content.includes('[AGENT PROFILE]') ? 'bg-[var(--accent-blue)]/20' : 'bg-cyan-500/20'}`}>
           {isUser ? (
             <User className="w-4 h-4 text-cyan-400" />
           ) : (
@@ -39,7 +38,7 @@ const MessageBubble = ({ message, isFirst }: { message: Message; isFirst: boolea
                   className="w-full h-full rounded-full object-cover"
                 />
                 <motion.div
-                  className="absolute inset-0 rounded-full border border-[var(--terminal-green)]/30"
+                  className="absolute inset-0 rounded-full border border-[var(--terminal-cyan)]/30"
                   animate={{
                     scale: [1, 1.2, 1],
                     opacity: [0.3, 0, 0.3],
@@ -52,7 +51,7 @@ const MessageBubble = ({ message, isFirst }: { message: Message; isFirst: boolea
                 />
               </>
             ) : (
-              <Bot className="w-4 h-4 text-emerald-400" />
+              <Bot className="w-4 h-4 text-cyan-400" />
             )
           )}
         </div>
@@ -62,20 +61,20 @@ const MessageBubble = ({ message, isFirst }: { message: Message; isFirst: boolea
         message.content.includes('[AGENT PROFILE]') ? 'w-full' : ''
       }`} style={{ maxWidth: message.content.includes('[AGENT PROFILE]') ? '100%' : '85%' }}>
         {isFirst && (
-          <div className={`text-xs font-medium mb-1 ${isUser ? 'text-right text-cyan-400' : 'text-left text-emerald-400'}`}>
+          <div className={`text-xs font-medium mb-1 ${isUser ? 'text-right text-cyan-400' : 'text-left text-cyan-400'}`}>
             {isUser ? 'USER' : selectedAgent?.name.toUpperCase()}
           </div>
         )}
         <div className={`px-3 py-2 rounded-xl break-words relative leading-relaxed shadow-lg text-sm
           ${isUser 
-            ? 'bg-[var(--highlight-blue)] text-gray-900' 
+            ? 'bg-[var(--highlight-blue)] text-[var(--terminal-cyan)]' 
             : message.content.includes('[AGENT PROFILE]')
-              ? 'bg-[var(--highlight-blue)] text-gray-900 font-mono whitespace-pre-wrap'
-              : 'bg-[var(--highlight-blue)] text-gray-900'}`}
+              ? 'bg-[var(--highlight-blue)] text-[var(--terminal-cyan)] font-mono whitespace-pre-wrap'
+              : 'bg-[var(--highlight-blue)] text-[var(--terminal-cyan)]'}`}
         >
           <span className="text-sm">{message.content}</span>
         </div>
-        <div className={`text-[10px] mt-1 text-[var(--terminal-green)]/70 ${isUser ? 'text-right' : 'text-left'}`}>
+        <div className={`text-[10px] mt-1 text-[var(--terminal-cyan)]/70 ${isUser ? 'text-right' : 'text-left'}`}>
           {message.timestamp.toLocaleTimeString()}
         </div>
       </div>
@@ -83,7 +82,7 @@ const MessageBubble = ({ message, isFirst }: { message: Message; isFirst: boolea
   );
 };
 
-export default function ChatInterface() {
+function ChatInterface() {
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -91,9 +90,11 @@ export default function ChatInterface() {
   const [error, setError] = useState<string | null>(null);
   const responseTimerRef = useRef<number>(0);
   const responseIntervalRef = useRef<NodeJS.Timeout>();
+  const terminalRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { selectedAgent, messages, addMessage, isCallActive, startCall, endCall, loadChatHistory } = useAgentStore();
+  const { selectedAgent, messagesByAgent, addMessage, isCallActive, loadChatHistory } = useAgentStore();
+  const messages = selectedAgent ? messagesByAgent[selectedAgent.id] || [] : [];
 
   const focusInput = useCallback(() => {
     if (inputRef.current) {
@@ -144,12 +145,16 @@ export default function ChatInterface() {
       inputRef.current?.focus();
     }, 100);
     return () => clearTimeout(timeoutId);
-  }, [messages, selectedAgent]);
+  }, [messages]);
 
   const handleSend = useCallback(async () => {
-    if (!input.trim() || !selectedAgent || isInputDisabled) return;
+    if (!input.trim() || isInputDisabled) return;
 
-    // Clear input and show typing state immediately
+    if (!selectedAgent) {
+      setError('No agent selected');
+      return;
+    }
+
     const trimmedInput = input.trim();
     setError(null);
     setIsTyping(true);
@@ -163,20 +168,20 @@ export default function ChatInterface() {
       responseTimerRef.current++;
     }, 1000);
 
-    const userMessage = {
-      id: crypto.randomUUID(),
-      agentId: selectedAgent.id,
-      content: trimmedInput,
-      timestamp: new Date(),
-      type: 'user'
-    };
-
     try {
-      await addMessage(userMessage);
+      const message = {
+        id: crypto.randomUUID(),
+        agentId: selectedAgent.id,
+        content: trimmedInput,
+        timestamp: new Date(),
+        type: 'user' as const
+      };
+      
+      await addMessage(message);
     } catch (error) {
       console.error('Error sending message:', error);
-      setError('Failed to send message. Please try again.');
-      setInput(trimmedInput); // Restore input on error
+      setError(error instanceof Error ? error.message : 'Failed to send message');
+      setInput(trimmedInput);
     } finally {
       setIsInputDisabled(false);
       setIsTyping(false);
@@ -190,42 +195,64 @@ export default function ChatInterface() {
   if (!selectedAgent) return null;
 
   return (
-    <div className="flex flex-col h-full bg-[var(--terminal-dark)]/95 rounded-lg backdrop-blur-sm terminal-border relative font-mono z-[5] crt">
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+CiAgPHBhdGggZD0iTTAgMGg2MHY2MEgweiIgZmlsbD0ibm9uZSIvPgogIDxwYXRoIGQgPSJNMzAgMzBMNjAgNjBIMHoiIGZpbGw9IiMwMGZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiIvPgo8L3N2Zz4=')] opacity-5" />
-      
-      <div className="flex items-center justify-between p-2 bg-gradient-to-r from-cyan-950/30 to-blue-950/30 border-b border-[var(--separator-green)] relative z-[7]">
-        <div>
-          <h3 className="text-sm font-bold text-[var(--terminal-green)] flex items-center gap-2 uppercase">
-            <motion.span
-              className="w-1.5 h-1.5 rounded-full bg-[var(--terminal-green)]"
-              animate={{
-                opacity: [0.7, 0.3, 0.7],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-            {selectedAgent.name}
+    <div className="flex flex-col h-full glass-panel rounded-lg relative font-mono z-[5] overflow-hidden">
+      <div className="flex items-center justify-between p-4 bg-black/40 border-b border-[var(--terminal-cyan)]/20 relative z-[7]">
+        <div className="flex-1 mr-4">
+          <h3 className="text-sm font-bold text-[var(--terminal-cyan)] flex items-center gap-2 uppercase tracking-wider">
+            <div className="relative flex-shrink-0">
+              <img
+                src={selectedAgent?.avatarUrl}
+                alt={selectedAgent?.name}
+                className="w-16 h-16 rounded-full object-cover ring-2 ring-[var(--terminal-cyan)]/30 shadow-[0_0_15px_rgba(0,255,255,0.2)]"
+              />
+              <motion.div
+                className="absolute inset-0 rounded-full ring-2 ring-[var(--terminal-cyan)]/30"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.3, 0, 0.3],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <motion.span
+                  className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                  animate={{
+                    opacity: [0.7, 0.3, 0.7],
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+                <span className="text-lg">{selectedAgent.name}</span>
+              </div>
+              <p className="text-base bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent font-bold tracking-wider mt-1">
+                {selectedAgent.title}
+              </p>
+            </div>
           </h3>
-          <div className="hidden md:flex items-center gap-2 mt-1">
-            <p className="text-xs text-[var(--terminal-green)]/70">PROJECT X v0.0.1</p>
-            <span className="text-xs text-[var(--terminal-green)]/70">•</span>
-            <p className="text-xs text-[var(--terminal-green)]/70">{messages.length} MESSAGES</p>
+          <div className="mt-2 text-sm text-[var(--terminal-cyan)]/70 line-clamp-3">
+            {selectedAgent.description}
           </div>
         </div>
         <button
           onClick={() => setIsPhoneModalOpen(true)}
-          className={`p-2 rounded-lg relative group ${
+          className={`px-4 py-2 rounded-lg relative group min-h-[44px] backdrop-blur-md flex items-center gap-2 transition-all duration-300 overflow-hidden ${
             isCallActive 
-              ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400/90 ring-1 ring-red-500/30' 
-              : 'bg-[var(--accent-blue)]/10 hover:bg-[var(--accent-blue)]/20 text-[var(--accent-blue)] ring-1 ring-[var(--accent-blue)]/30'
+              ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]' 
+              : 'bg-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/30 text-[var(--accent-blue)] border border-[var(--accent-blue)]/50 shadow-[0_0_15px_rgba(0,255,255,0.2)] hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]'
           }`}
         >
           <motion.div
-            className="absolute inset-0 rounded-lg ring-2 ring-[var(--accent-blue)]/30"
+            className="absolute inset-0 rounded-lg ring-1 ring-[var(--accent-blue)]/30"
             animate={{
               scale: [1, 1.2, 1],
               opacity: [0.3, 0, 0.3],
@@ -236,7 +263,28 @@ export default function ChatInterface() {
               ease: "easeInOut"
             }}
           />
-          {isCallActive ? <PhoneOff size={20} /> : <Phone size={20} />}
+          {isCallActive ? (
+            <>
+              <PhoneOffIcon size={20} />
+              <span className="font-medium">End Call</span>
+            </>
+          ) : (
+            <>
+              <Phone size={20} />
+              <span className="font-medium">Call Me</span>
+            </>
+          )}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+            animate={{
+              x: ['-200%', '200%']
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          />
         </button>
         <PhoneModal 
           isOpen={isPhoneModalOpen}
@@ -244,10 +292,13 @@ export default function ChatInterface() {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2 space-y-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/20 text-xs leading-5 relative min-h-0 z-[6]">
+      <div
+        ref={terminalRef}
+        className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/20 text-sm leading-5 relative min-h-0 z-[6]"
+      >
         <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-black/60 to-transparent pointer-events-none z-[8]" />
         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-[8]" />
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync">
         {Object.entries(groupedMessages).map(([date, dateMessages]) => (
           <div key={date} className="mb-6">
             <div className="sticky top-0 bg-cyan-950/90 backdrop-blur-sm py-1 px-2 rounded-lg mb-2 z-[7] border border-[var(--separator-green)] shadow-[0_0_15px_rgba(0,255,255,0.1)]">
@@ -282,14 +333,14 @@ export default function ChatInterface() {
         )}
       </div>
 
-      <div className="p-2 border-t border-[var(--separator-green)] bg-gradient-to-r from-cyan-950/30 to-blue-950/30 relative z-[7]">
+      <div className="p-4 border-t border-[var(--terminal-cyan)]/20 bg-black/40 relative z-[7]">
         <AnimatePresence>
           {isTyping && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="absolute bottom-16 left-2 flex items-center gap-2 text-emerald-400/70"
+              className="absolute -top-10 left-4 flex items-center gap-2 text-emerald-400/70"
             >
               <Loader2 className="w-4 h-4 animate-spin" />
               <span className="text-sm">Generating response...</span>
@@ -298,7 +349,7 @@ export default function ChatInterface() {
         </AnimatePresence>
         
         <div 
-          className="flex gap-2 items-center bg-gradient-to-r from-[var(--accent-blue)]/5 to-[var(--accent-blue)]/10 rounded-lg p-2 relative"
+          className="flex gap-2 items-center bg-black/30 backdrop-blur-md rounded-lg p-2 relative max-h-[200px] overflow-y-auto border border-[var(--terminal-cyan)]/20"
         >
           <input
             ref={inputRef}
@@ -307,17 +358,15 @@ export default function ChatInterface() {
             onChange={(e) => !isInputDisabled && setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && !isTyping && !isInputDisabled && handleSend()}
             placeholder={`Message ${selectedAgent.name}...`}
-            disabled={isInputDisabled}
-            className={`flex-1 bg-transparent text-cyan-100 px-2 py-2 focus:outline-none border-none rounded-lg
-              text-sm caret-cyan-400 placeholder-cyan-500/50 transition-opacity duration-200
+            className={`flex-1 glass-input text-cyan-100 px-2 py-2 focus:outline-none border-none rounded-lg
+              text-sm caret-cyan-400 placeholder-cyan-500/50 min-h-[44px]
               ${isInputDisabled ? 'opacity-50 cursor-not-allowed' : 'opacity-100'}`}
           />
           {error && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute -top-8 left-0 right-0 text-center text-red-400 text-sm"
+              className="absolute -top-10 left-0 right-0 text-center text-red-400 text-sm"
             >
               {error}
             </motion.div>
@@ -328,7 +377,7 @@ export default function ChatInterface() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            className={`p-2 rounded-lg transition-colors duration-200 ${
+            className={`p-2 rounded-lg transition-colors duration-200 backdrop-blur-md ${
               isInputDisabled || !input.trim()
                 ? 'bg-cyan-500/5 text-cyan-400/30 cursor-not-allowed text-sm'
                 : 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400/90 text-sm'
@@ -338,10 +387,31 @@ export default function ChatInterface() {
           </motion.button>
         </div>
         
-        <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--separator-green)]/70">
-          <div>[TERMINAL v0.0.1] [ENCRYPTION: AES-256] [STATUS: SECURE]</div>
+        <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--terminal-cyan)]/50">
+          <div>[NEURAL.SYS v0.0.1] [<span className="text-red-400 dark:text-cyan-400">ENCRYPTED</span>] [STATUS: <motion.span
+            className="relative"
+            animate={{
+              textShadow: [
+                '0 0 4px var(--glow-color-rgb)',
+                '0 0 8px var(--glow-color-rgb)',
+                '0 0 4px var(--glow-color-rgb)'
+              ],
+              color: [
+                'var(--glow-color)',
+                'var(--glow-color-dim)',
+                'var(--glow-color)'
+              ]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            ACTIVE
+          </motion.span>]</div>
           <div className="flex items-center gap-1">
-            <div className={`w-1.5 h-1.5 rounded-full ${isInputDisabled ? 'bg-[var(--separator-green)] animate-pulse' : 'bg-[var(--separator-green)]'}`} />
+            <div className={`w-1.5 h-1.5 rounded-full ${isInputDisabled ? 'bg-[var(--terminal-cyan)] animate-pulse' : 'bg-[var(--terminal-cyan)]'}`} />
             {isInputDisabled ? 'PROCESSING' : 'READY'}
           </div>
         </div>
@@ -349,3 +419,5 @@ export default function ChatInterface() {
     </div>
   );
 }
+
+export default ChatInterface;

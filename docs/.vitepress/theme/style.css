@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Font settings */
+  --vp-font-family-base: monospace;
+  --vp-font-family-mono: monospace;
+
+  /* Light theme */
+  --vp-c-brand-light: #ff4040;
+  --vp-c-brand: #ff0000;
+  --vp-c-brand-dark: #cc0000;
+  --vp-c-brand-darker: #990000;
+  --vp-c-glow: rgba(255, 0, 0, 0.4);
+  --vp-c-glow-text: rgba(255, 0, 0, 0.6);
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-alt: #f6f6f7;
+  --vp-c-bg-soft: #f6f6f7;
+  --vp-c-text: #374151;
+  --vp-c-text-1: #374151;
+  --vp-c-text-2: #4b5563;
+  --vp-c-divider: rgba(255, 0, 0, 0.1);
+  --vp-c-divider-light: rgba(255, 0, 0, 0.05);
+
+  /* Light theme colors */
+  --terminal-red: #ff2020;
+  --highlight-red: #f0e6e6;
+  --separator-red: #ff2020;
+  --terminal-light: #e6e0e0;
+  --accent-red: #ff2020;
+  --terminal-primary: var(--terminal-red);
+  --glow-shadow: 0 0 20px rgba(255, 0, 51, 0.4);
+  --glow-text: 0 0 10px rgba(255, 0, 51, 0.6);
+}
+
+/* Dark theme */
+.dark {
+  --vp-c-brand-light: #40ffff;
+  --vp-c-brand: #00ffff;
+  --vp-c-brand-dark: #00e6e6;
+  --vp-c-brand-darker: #00cccc;
+  --vp-c-glow: rgba(0, 255, 255, 0.4);
+  --vp-c-glow-text: rgba(0, 255, 255, 0.6);
+  --vp-c-bg: #0a0c0f;
+  --vp-c-bg-alt: #13151a;
+  --vp-c-bg-soft: #13151a;
+  --vp-c-text: #f0f0f0;
+  --vp-c-text-1: #f0f0f0;
+  --vp-c-text-2: #adbac7;
+  --vp-c-divider: rgba(0, 255, 255, 0.1);
+  --vp-c-divider-light: rgba(0, 255, 255, 0.05);
+
+  /* Dark theme colors */
+  --terminal-cyan: #00ffff;
+  --highlight-cyan: #f0ffff;
+  --separator-cyan: #00ffff;
+  --terminal-dark: #002626;
+  --accent-cyan: #00ffff;
+  --terminal-primary: var(--terminal-cyan);
+  --glow-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  --glow-text: 0 0 10px rgba(0, 255, 255, 0.6);
+}
+
+/* Links */
+.vp-doc a {
+  color: var(--vp-c-brand);
+  text-decoration: none;
+  transition: all 0.25s;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.2rem;
+}
+
+.vp-doc a:hover {
+  background: var(--vp-c-brand);
+  color: var(--vp-c-bg);
+  text-decoration: none;
+}
+
+/* Logo styling */
+.VPNavBarTitle {
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  margin-right: 1rem !important;
+}
+
+.VPNavBarTitle .title {
+  font-size: 1.5rem !important;
+  background: linear-gradient(45deg, var(--vp-c-brand), var(--vp-c-brand-light)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-size: 200% 200% !important;
+  animation: gradient 4s ease infinite !important;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Sidebar styling */
+.VPSidebar {
+  padding-top: 64px !important;
+  border-right: 1px solid var(--vp-c-divider) !important;
+  background: var(--vp-c-bg) !important;
+  backdrop-filter: blur(8px) !important;
+  font-family: monospace !important;
+  width: 280px !important;
+  padding: 64px 24px 32px !important;
+}
+
+/* Navigation bar */
+.VPNavBar {
+  height: 64px !important;
+  padding: 0 24px !important;
+  border-bottom: 1px solid var(--vp-c-divider) !important;
+  background: var(--vp-c-bg) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.VPNavBarContent {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+
+.VPNavBarSearch {
+  flex: 1 !important;
+  padding: 0 24px !important;
+}
+
+.VPNavBarMenu {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.VPSidebarItem .text {
+  color: var(--vp-c-text-2) !important;
+  font-size: 14px !important;
+  transition: all 0.2s ease !important;
+  padding: 6px 12px !important;
+  margin-left: -12px !important;
+  border-radius: 6px !important;
+}
+
+.VPSidebarItem.is-active .text {
+  color: var(--vp-c-brand) !important;
+  font-weight: 500 !important;
+  background: var(--vp-c-brand-dimm-2, rgba(var(--vp-c-brand-light), 0.1)) !important;
+  box-shadow: 0 0 20px var(--vp-c-glow) !important;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .VPSidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .VPContent {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}

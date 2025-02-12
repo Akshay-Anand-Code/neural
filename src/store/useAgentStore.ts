@@ -1,209 +1,304 @@
 import { create } from 'zustand';
 import { Agent, Message } from '../types/agent';
 import { loadAgents } from '../utils/loadAgents';
-import { OpenAI } from 'openai';
-import { DeepSeekProvider } from '../utils/deepseek';
+import { venice } from '../utils/venice';
+import { blandAI } from '../utils/blandAI';
+import { API_CONFIG } from '../config/api';
 import { db } from '../db';
-
-// Initialize DeepSeek provider
-const deepseek = new DeepSeekProvider({
-  apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY || '',
-  baseUrl: 'https://api.deepseek.com'
-});
-
-// Message type for API
-type APIMessage = {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-};
 
 interface AgentStore {
   agents: Agent[];
   selectedAgent: Agent | null;
-  userId: string;
-  currentConversationId: string | null;
-  messages: Message[];
+  messagesByAgent: Record<string, Message[]>;
   isCallActive: boolean;
-  selectAgent: (agentId: string) => void;
-  resetAgent: () => void;
-  addMessage: (message: Message) => void;
+  agentStats: Record<string, AgentStats>;
+  loadAgents: () => Promise<void>;
+  selectAgent: (id: string) => void;
+  addMessage: (message: Message) => Promise<void>;
+  clearMessages: () => void;
   loadChatHistory: (agentId: string) => Promise<void>;
-  startCall: () => void;
+  startCall: (phoneNumber: string, countryCode: string) => Promise<{ success: boolean; message: string }>;
   endCall: () => void;
+  getCallStatus: () => Promise<string>;
 }
 
-export const useAgentStore = create<AgentStore>((set) => {
-  // Generate a user ID and create user in database
-  const userId = crypto.randomUUID();
-  
-  // Load agents immediately
-  loadAgents().then(loadedAgents => {
-    set({ agents: loadedAgents });
-  }).catch(error => {
-    console.error('Failed to load agents:', error);
-    set({ agents: [] });
-  });
-
-  return {
+export const useAgentStore = create<AgentStore>((set) => ({
   agents: [],
   selectedAgent: null,
-  userId,
-  currentConversationId: null,
-  messages: [],
+  messagesByAgent: {},
+  agentStats: {},
   isCallActive: false,
-  selectAgent: (agentId) => {
-    set((state) => {
-      const agent = state.agents.find(a => a.id === agentId);
-      let newState = { selectedAgent: agent || null, messages: [] };
+
+  loadAgents: async () => {
+    try {
+      const agents = await loadAgents();
       
-      // Create welcome message with agent info
-      if (agent) {
-        const welcomeMessage = {
-          id: crypto.randomUUID(),
-          agentId: agent.id,
-          content: `[AGENT PROFILE]
-
-Name: ${agent.name}
-Title: ${agent.title}
-
-Description: ${agent.description}
-
-Personality Analysis:
-• Tone: ${agent.personality.tone}
-• Core Traits: ${agent.personality.traits.join(', ')}
-
-[SECURE CHANNEL ESTABLISHED]
-You may now begin your conversation...`,
-          timestamp: new Date(),
-          type: 'agent'
-        };
-
-        newState.messages = [welcomeMessage];
-      }
+      // Initialize stats for each agent if not exists
+      const stats = { ...useAgentStore.getState().agentStats };
+      agents.forEach(agent => {
+        if (!stats[agent.id]) {
+          stats[agent.id] = {
+            level: 1,
+            experience: 0,
+            stats: {
+              influence: 1,
+              knowledge: 1,
+              trust: 1,
+              connection: 1
+            }
+          };
+        }
+      });
       
-      // Create a new conversation in the database
-      if (agent) {
-        (async () => {
-          try {
-            await db.createUser(state.userId);
-            const conversationId = await db.createConversation(state.userId, agent.id);
-            set(state => ({ ...state, currentConversationId: conversationId }));
-          } catch (error) {
-            console.error('Error creating conversation:', error);
-          }
-        })();
-      }
-      
-      return newState;
-    });
-  },
-  resetAgent: () => {
-    set({ selectedAgent: null, messages: [], currentConversationId: null });
-  },
-  loadChatHistory: async (agentId) => {
-    const state = useAgentStore.getState();
-    const history = await db.getConversationHistory(state.userId, agentId);
-    set({ messages: history });
-  },
-  addMessage: (message) => set(async (state) => {
-    const newMessages = [...state.messages, message];
-    
-    // Immediately update state with user message
-    set({ messages: newMessages });
-    
-    // Save user message to database
-    if (state.currentConversationId) {
-      try {
-        await db.addMessage(
-          state.currentConversationId,
-          message.content,
-          message.type
-        );
-      } catch (error) {
-        console.error('Error saving message to database:', error);
-        throw new Error('Failed to save message to database');
-      }
+      set({ agents, agentStats: stats });
+      console.info(`Successfully loaded ${agents.length} agents`);
+
+    } catch (error) {
+      console.error('Error in loadAgents:', error instanceof Error ? error.message : error);
+      // Don't throw - let the app continue with empty agents array
     }
-    
-    // Only process user messages
-    if (message.type !== 'user' || !state.selectedAgent) {
-      return;
+  },
+
+  selectAgent: (id) => {
+    set((state) => ({
+      selectedAgent: state.agents.find(agent => agent.id === id) || null,
+    }));
+  },
+
+  addMessage: async (message) => {
+    if (!message.content.trim()) {
+      console.error('Empty message content');
+      throw new Error('Empty message content');
     }
 
-    // Convert agent data to JSON string for the system prompt
-    const agentData = JSON.stringify(state.selectedAgent);
+    set((state) => ({ 
+      messagesByAgent: {
+        ...state.messagesByAgent,
+        [message.agentId]: [
+          ...(state.messagesByAgent[message.agentId] || []),
+          message
+        ]
+      }
+    }));
 
-    // Create character configuration
-    const character = {
-      systemPrompt: agentData,
-      temperature: message.content.toLowerCase().includes('story') ? 0.85 : 0.8,
-      maxTokens: message.content.toLowerCase().includes('story') ? 250 : 200,
-      systemInstructions: `
-        RESPONSE GUIDELINES:
-        1. Stay deeply in character at all times
-        2. Use your unique speech patterns and catchphrases
-        3. Reference your experiences, beliefs, and fears naturally
-        4. Keep responses focused but characterful (15-30 words)
-        5. Always end responses naturally, never trailing off
-        6. Maintain your worldview and personality consistently
-        7. For stories: build suspense and end with impact
-      `
+    const { selectedAgent } = useAgentStore.getState();
+    if (!selectedAgent) {
+      throw new Error('No agent selected');
+    }
+
+    // Calculate stat rewards based on message content and agent personality
+    const calculateReward = (content: string, agent: Agent): StatReward => {
+      let reward: StatReward = {
+        experience: 10, // Base XP
+        stats: {},
+        message: ''
+      };
+
+      // Check for alignment with agent's beliefs and traits
+      const beliefs = agent.background.beliefs.map(b => b.toLowerCase());
+      const traits = agent.personality.traits.map(t => t.toLowerCase());
+      const content_lower = content.toLowerCase();
+
+      // Increase rewards if message aligns with agent's beliefs/traits
+      beliefs.forEach(belief => {
+        if (content_lower.includes(belief)) {
+          reward.experience += 15;
+          reward.stats.knowledge = (reward.stats.knowledge || 0) + 1;
+          reward.stats.trust = (reward.stats.trust || 0) + 0.5;
+        }
+      });
+
+      traits.forEach(trait => {
+        if (content_lower.includes(trait)) {
+          reward.experience += 10;
+          reward.stats.connection = (reward.stats.connection || 0) + 1;
+        }
+      });
+
+      // Check for keywords indicating influence
+      const influenceKeywords = ['agree', 'right', 'true', 'correct', 'understand'];
+      influenceKeywords.forEach(keyword => {
+        if (content_lower.includes(keyword)) {
+          reward.experience += 5;
+          reward.stats.influence = (reward.stats.influence || 0) + 0.5;
+        }
+      });
+
+      // Generate reward message
+      if (Object.keys(reward.stats).length > 0) {
+        reward.message = `[NEURAL SYNC: Connection strengthened with ${agent.name}]\n`;
+        if (reward.stats.knowledge) reward.message += `Knowledge +${reward.stats.knowledge} `;
+        if (reward.stats.trust) reward.message += `Trust +${reward.stats.trust} `;
+        if (reward.stats.influence) reward.message += `Influence +${reward.stats.influence} `;
+        if (reward.stats.connection) reward.message += `Connection +${reward.stats.connection}`;
+      }
+
+      return reward;
+    };
+
+    // Apply rewards and level up if needed
+    const applyRewards = (agentId: string, reward: StatReward) => {
+      set(state => {
+        const stats = { ...state.agentStats };
+        const agentStats = stats[agentId];
+        
+        // Add experience
+        agentStats.experience += reward.experience;
+        
+        // Calculate new level (every 100 XP)
+        const newLevel = Math.floor(agentStats.experience / 100) + 1;
+        if (newLevel > agentStats.level) {
+          reward.message = `${reward.message}\n[LEVEL UP! Neural connection with ${selectedAgent.name} strengthened to level ${newLevel}]`;
+        }
+        agentStats.level = newLevel;
+        
+        // Apply stat increases
+        Object.entries(reward.stats).forEach(([stat, value]) => {
+          agentStats.stats[stat as keyof AgentStats['stats']] += value;
+        });
+        
+        return { agentStats: stats };
+      });
     };
 
     try {
-      const agentResponse = await deepseek.chat(message.content, character);
+      console.log('Generating response for agent:', selectedAgent.name);
       
-      // Clean up response to ensure it's complete
-      let cleanedResponse = agentResponse.trim();
-      if (cleanedResponse.endsWith('...')) {
-        cleanedResponse = cleanedResponse.slice(0, -3) + '.';
-      }
-      
-      // Ensure response ends with proper punctuation
-      if (!cleanedResponse.endsWith('.') && !cleanedResponse.endsWith('!') && !cleanedResponse.endsWith('?')) {
-        cleanedResponse += '.';
-      }
+      // Generate agent's response using Venice AI
+      const response = await venice.chatWithAgent(message.content, selectedAgent, {
+        systemPrompt: venice['buildAgentSystemPrompt'](selectedAgent)
+      });
 
-      // Create agent message
+      console.log('Generated response:', response);
+      
       const agentMessage = {
         id: crypto.randomUUID(),
-        agentId: state.selectedAgent.id,
-        content: cleanedResponse,
+        agentId: selectedAgent.id,
+        content: response,
         timestamp: new Date(),
-        type: 'agent' as const
+        type: 'agent'
       };
 
-      // Save agent response to database
-      if (state.currentConversationId) {
-        await db.addMessage(
-          state.currentConversationId,
-          agentResponse,
-          'agent'
-        );
+      set((state) => ({
+        messagesByAgent: {
+          ...state.messagesByAgent,
+          [selectedAgent.id]: [
+            ...(state.messagesByAgent[selectedAgent.id] || []),
+            agentMessage
+          ]
+        }
+      }));
+
+      // Calculate and apply rewards
+      const reward = calculateReward(message.content, selectedAgent);
+      applyRewards(selectedAgent.id, reward);
+      
+      // Show reward message if there are stat increases
+      if (reward.message) {
+        await addMessage({
+          id: crypto.randomUUID(),
+          agentId: selectedAgent.id,
+          content: reward.message,
+          timestamp: new Date(),
+          type: 'agent'
+        });
+      }
+
+      try {
+        await db.addMessage(message.id, message.content, 'user');
+        await db.addMessage(agentMessage.id, agentMessage.content, 'agent');
+      } catch (dbError) {
+        console.error('Failed to store messages in database:', dbError);
+      }
+
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Failed to generate response');
+    }
+  },
+
+  clearMessages: () => {
+    set((state) => ({
+      messagesByAgent: state.selectedAgent
+        ? { ...state.messagesByAgent, [state.selectedAgent.id]: [] }
+        : state.messagesByAgent
+    }));
+  },
+
+  loadChatHistory: async (agentId) => {
+    const messages = await db.getConversationHistory('user', agentId);
+    set((state) => ({
+      messagesByAgent: {
+        ...state.messagesByAgent,
+        [agentId]: messages
+      }
+    }));
+  },
+
+  startCall: async (phoneNumber: string, countryCode: string) => {
+    const { selectedAgent } = useAgentStore.getState();
+    
+    // Validate API configuration and agent
+    if (!API_CONFIG.BLAND_AI_KEY || !API_CONFIG.BLAND_ORG_ID) {
+      return {
+        success: false,
+        message: 'Voice synthesis module not configured. Please check your environment variables.'
+      };
+    }
+
+    if (!selectedAgent) {
+      return {
+        success: false,
+        message: 'No agent selected'
+      };
+    }
+    
+    if (!selectedAgent.config?.pathwayId) {
+      return {
+        success: false,
+        message: 'Voice pathway not configured for this agent.'
+      };
+    }
+    
+    if (!selectedAgent.config?.phone) {
+      return {
+        success: false,
+        message: 'Phone number not configured for this agent. Please check agent configuration.'
+      };
+    }
+
+    try {
+      const result = await blandAI.initiateCall(phoneNumber, countryCode, selectedAgent);
+      
+      if (result.success) {
+        set({ isCallActive: true });
+        // Reset call active state after 5 seconds for testing
+        setTimeout(() => { 
+          set({ isCallActive: false });
+        }, 5000);
       }
       
-      // Update state with agent message
-      set(state => ({
-        messages: [...state.messages, agentMessage]
-      }));
-    } catch (error: any) {
-      console.error('DeepSeek API error:', error);
-      
-      // Add error message to chat
-      const errorMessage = {
-        id: crypto.randomUUID(),
-        agentId: state.selectedAgent.id,
-        content: error.message || "I apologize, but I'm having trouble connecting. Please try again.",
-        timestamp: new Date(),
-        type: 'agent' as const
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Failed to establish quantum connection. Please verify your credentials and try again.';
+
+      console.error('Call initiation error:', error);
+
+      return {
+        success: false,
+        message: errorMessage
       };
-      
-      // Update state with error message
-      set(state => ({
-        messages: [...state.messages, errorMessage]
-      }));
     }
-  }),
-  startCall: () => set({ isCallActive: true }),
-  endCall: () => set({ isCallActive: false })
-}});
+  },
+
+  endCall: () => {
+    set({ isCallActive: false });
+  },
+
+  getCallStatus: async () => {
+    // Implement call status checking logic here
+    // For now, return a mock status
+    return 'in-progress';
+  }
+}));

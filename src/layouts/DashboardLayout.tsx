@@ -1,8 +1,9 @@
 import { Outlet, Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { motion } from 'framer-motion';
-import { Eye, Binary, Shield, Scan } from 'lucide-react';
+import { Eye, Binary, Shield, Scan, Book, Menu } from 'lucide-react';
 import MobileSidebar from '../components/MobileSidebar';
+import { useState } from 'react';
 
 const ProjectXLogo = () => {
   const glitchVariants = {
@@ -15,7 +16,6 @@ const ProjectXLogo = () => {
       className="relative inline-block"
       initial="hidden"
       animate="visible"
-      variants={glitchVariants}
     >
       {/* Background glow effect */}
       <motion.div
@@ -168,17 +168,78 @@ const ProjectXLogo = () => {
 };
 
 export default function DashboardLayout() {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="min-h-screen bg-[var(--terminal-dark)] text-[var(--terminal-green)] relative">
+    <div className="min-h-screen bg-[var(--terminal-dark)] text-[var(--terminal-green)] relative flex flex-col overflow-hidden">
+      {/* Background effects */}
+      <motion.div className="fixed inset-0 w-full h-full overflow-hidden">
+        {/* Flowing gradient lines */}
+        <motion.div
+          className="absolute inset-0 opacity-70"
+          style={{
+            background: `
+              linear-gradient(45deg, transparent 45%, rgba(255,0,80,0.1) 49%, transparent 51%),
+              linear-gradient(-45deg, transparent 45%, rgba(0,150,255,0.1) 49%, transparent 51%)
+            `,
+            backgroundSize: '200% 200%, 200% 200%',
+            filter: 'blur(1px)'
+          }}
+          animate={{
+            backgroundPosition: ['0% 0%, 0% 0%', '200% 200%, -200% 200%']
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        
+        {/* Floating gradient spheres */}
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-32 h-32 rounded-full"
+            style={{
+              background: i % 2 === 0 
+                ? 'radial-gradient(circle at 30% 30%, rgba(255,0,80,0.2), transparent)'
+                : 'radial-gradient(circle at 30% 30%, rgba(0,150,255,0.2), transparent)',
+              filter: 'blur(20px)'
+            }}
+            initial={{
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight
+            }}
+            animate={{
+              x: [null, Math.random() * window.innerWidth],
+              y: [null, Math.random() * window.innerHeight],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{
+              duration: Math.random() * 10 + 10,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* Content */}
       
-      <div className="relative z-[3] flex flex-col min-h-screen bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.4)_100%)]">
-        <header className="relative z-10 bg-[var(--terminal-dark)]/90 border-b border-[var(--separator-green)] backdrop-blur-sm h-12">
-          <div className="container mx-auto px-3 py-2 flex items-center justify-between">
-            <Link to="/" className="text-xl sm:text-2xl md:text-3xl font-bold hover:opacity-80 transition-opacity">
-              <ProjectXLogo />
-            </Link>
-            
-            <div className="hidden md:flex items-center gap-6 text-sm font-mono">
+      <div className="relative flex flex-col min-h-screen">
+        <header className="fixed top-0 left-0 right-0 z-[50] bg-black/40 border-b border-[var(--separator-green)]/30 backdrop-blur-md h-12">
+          <div className="container mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-6">
+              <Link to="/" className="text-3xl sm:text-3xl font-bold hover:opacity-80 transition-opacity flex items-center">
+                <ProjectXLogo />
+              </Link>
+            </div>
+            <div className="hidden md:flex items-center gap-3 text-xs font-mono ml-auto">
+              <a
+                href="https://jazzy-sunburst-f1a212.netlify.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-[var(--terminal-cyan)]/70 hover:text-[var(--terminal-cyan)] transition-colors"
+              >
+                <Book className="w-4 h-4" />
+                <span>DOCS</span>
+              </a>
               {[
                 { Icon: Eye, text: "NEURAL LINK", active: true },
                 { Icon: Binary, text: "QUANTUM SYNC", active: true },
@@ -187,15 +248,15 @@ export default function DashboardLayout() {
               ].map(({ Icon, text }) => (
                 <motion.div
                   key={text}
-                  className="flex items-center gap-2 text-[var(--accent-blue)]"
+                  className="flex items-center gap-1.5 text-[var(--accent-blue)] bg-black/30 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-[var(--accent-blue)]/20 min-w-[120px] relative z-10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
                   whileHover={{ scale: 1.05, color: 'var(--terminal-green)' }}
                 >
                   <Icon className="w-4 h-4" />
-                  <div className="flex items-center gap-2 select-none">
+                  <div className="flex items-center justify-between gap-2 select-none flex-1">
                     <span>{text}</span>
                     <div className="flex items-center gap-1">
                       <motion.div
-                        className="w-1 h-1 rounded-full bg-[var(--separator-green)] shadow-[0_0_8px_var(--terminal-green)] inline-block"
+                        className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)] inline-block"
                         animate={{
                           opacity: [0.4, 0.8, 0.4],
                           scale: [1, 1.1, 1],
@@ -206,26 +267,53 @@ export default function DashboardLayout() {
                           ease: "easeInOut"
                         }}
                       />
-                      <span className="text-[9px] text-[var(--terminal-green)] font-bold tracking-wider ml-1">
+                      <motion.span
+                        className="text-[9px] font-bold tracking-wider ml-1 text-emerald-400"
+                        animate={{
+                          textShadow: [
+                            '0 0 4px rgba(52,211,153,0.5)',
+                            '0 0 8px rgba(52,211,153,0.8)',
+                            '0 0 4px rgba(52,211,153,0.5)'
+                          ],
+                          color: [
+                            'rgba(52,211,153,1)',
+                            'rgba(52,211,153,0.8)',
+                            'rgba(52,211,153,1)'
+                          ]
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
                         ACTIVE
-                      </span>
+                      </motion.span>
                     </div>
                   </div>
                 </motion.div>
               ))}
             </div>
-            <div className="flex md:hidden items-center gap-2">
-              {[Shield, Scan].map((Icon, i) => (
-                <motion.div
-                  key={i}
-                  className="p-2 text-[var(--terminal-green)]/60 relative select-none"
-                  whileHover={{ scale: 1.05, color: 'var(--terminal-green)' }}
-                >
-                  <Icon className="w-5 h-5" />
+            <div className="flex md:hidden items-center gap-4 ml-auto">
+              <Link
+                to="https://jazzy-sunburst-f1a212.netlify.app"
+                className="flex items-center gap-1.5 text-[var(--terminal-cyan)]/70 hover:text-[var(--terminal-cyan)] text-[10px] transition-colors h-8"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Book className="w-4 h-4" />
+                <span>DOCS</span>
+              </Link>
+              <button
+                onClick={() => setIsOpen(true)}
+                className="h-9 w-9 bg-black/40 rounded-lg border border-[var(--terminal-green)]/30 shadow-[0_0_15px_rgba(0,255,187,0.1)] backdrop-blur-md flex items-center justify-center transition-transform duration-300"
+              >
+                <div className="relative">
+                  <Menu className="w-6 h-6 text-[var(--terminal-green)]" />
                   <motion.div
-                    className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[var(--terminal-green)]"
+                    className="absolute inset-0"
                     animate={{
-                      opacity: [0.4, 0.8, 0.4],
+                      opacity: [0.5, 1, 0.5],
                       scale: [1, 1.1, 1],
                     }}
                     transition={{
@@ -234,20 +322,20 @@ export default function DashboardLayout() {
                       ease: "easeInOut"
                     }}
                   />
-                </motion.div>
-              ))}
+                </div>
+              </button>
             </div>
           </div>
         </header>
         
-        <div className="flex-1 flex flex-col md:flex-row">
-          <div className="md:hidden">
-            <MobileSidebar />
+        <div className="flex-1 flex flex-col md:flex-row relative z-40 mt-12">
+          <div className="md:hidden relative z-[60]">
+            <MobileSidebar isOpen={isOpen} setIsOpen={setIsOpen} />
           </div>
-          <div className="hidden md:block">
+          <div className="hidden md:block border-r border-[var(--terminal-cyan)]/30 relative z-[50]">
             <Sidebar />
           </div>
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto relative z-40">
             <Outlet />
           </main>
         </div>
