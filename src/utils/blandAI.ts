@@ -11,15 +11,20 @@ class BlandAIService {
   private orgId: string;
   private webhookSecret: string;
   private baseUrl = 'https://api.bland.ai/v1';
+  private disabled: boolean;
 
   constructor(config: BlandAIConfig) {
     // Clean and validate API key
     this.apiKey = config.apiKey?.trim() || '';
     this.orgId = config.orgId?.trim() || '';
     this.webhookSecret = config.webhookSecret || '';
-
-    if (!this.apiKey || !this.orgId) {
-      throw new Error('BlandAI credentials missing. Please check your environment variables.');
+    
+    // Check if BlandAI should be disabled
+    this.disabled = !this.apiKey || !this.orgId || import.meta.env.VITE_DISABLE_BLAND_AI === 'true';
+    
+    // Don't throw error if disabled
+    if (!this.disabled && (!this.apiKey || !this.orgId)) {
+      console.warn('BlandAI credentials missing. Voice features will be disabled.');
     }
   }
 
@@ -75,6 +80,16 @@ class BlandAIService {
 
   async initiateCall(phoneNumber: string, countryCode: string, agent: Agent): Promise<{ success: boolean; message: string; callId?: string }> {
     try {
+      // Check if BlandAI is disabled
+      if (this.disabled) {
+        console.log('BlandAI is disabled. Simulating successful call.');
+        return {
+          success: true,
+          message: 'BlandAI is disabled. Call simulation successful.',
+          callId: 'mock-call-id'
+        };
+      }
+
       if (!this.apiKey || !this.orgId) {
         throw new Error('Voice synthesis module not configured. Please check your environment variables.');
       }
@@ -160,13 +175,19 @@ class BlandAIService {
 
   async getCallStatus(callId: string): Promise<string> {
     try {
+      // Check if BlandAI is disabled
+      if (this.disabled) {
+        console.log('BlandAI is disabled. Returning mock call status.');
+        return 'completed';
+      }
+      
       if (!this.apiKey || !this.orgId) {
         throw new Error('Voice synthesis module not configured');
       }
 
       const response = await fetch(`${this.baseUrl}/calls/${callId}`, {
         headers: {
-          'Authorization': `${this.apiKey}`,
+          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json'
         }
       });

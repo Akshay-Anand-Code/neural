@@ -237,6 +237,22 @@ export const useAgentStore = create<AgentStore>((set) => ({
   startCall: async (phoneNumber: string, countryCode: string) => {
     const { selectedAgent } = useAgentStore.getState();
     
+    // Check if BlandAI is explicitly disabled
+    if (import.meta.env.VITE_DISABLE_BLAND_AI === 'true') {
+      console.log('BlandAI is disabled. Simulating successful call.');
+      // Simulate a successful call
+      set({ isCallActive: true });
+      // Reset call active state after 5 seconds for testing
+      setTimeout(() => { 
+        set({ isCallActive: false });
+      }, 5000);
+      
+      return {
+        success: true,
+        message: 'BlandAI is disabled. Call simulation successful.'
+      };
+    }
+    
     // Validate API configuration and agent
     if (!API_CONFIG.BLAND_AI_KEY || !API_CONFIG.BLAND_ORG_ID) {
       return {
