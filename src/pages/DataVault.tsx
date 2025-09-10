@@ -68,8 +68,8 @@ export default function DataVault() {
               name: filename,
               size: `${(parseInt(size) / 1024).toFixed(1)} KB`,
               lastModified: new Date(lastModified).toLocaleDateString(),
-              content: result.data.data,
-              headers: result.data.headers
+              content: result.data.data ?? [],
+              headers: result.data.headers ?? []
             };
           }));
           

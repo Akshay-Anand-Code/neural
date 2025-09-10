@@ -171,7 +171,7 @@ export const useAgentStore = create<AgentStore>((set) => ({
 
       console.log('Generated response:', response);
       
-      const agentMessage = {
+      const agentMessage: Message = {
         id: crypto.randomUUID(),
         agentId: selectedAgent.id,
         content: response,

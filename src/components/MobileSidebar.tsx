@@ -107,7 +107,7 @@ function MobileSidebar({ isOpen, setIsOpen }: MobileSidebarProps) {
                       }
 
                       {/* Hover/Active animation */}
-                      {!item.disabled && (
+                      {
                         <motion.div
                           className="absolute inset-0 bg-[var(--terminal-green)]/5"
                           initial={false}
@@ -121,7 +121,7 @@ function MobileSidebar({ isOpen, setIsOpen }: MobileSidebarProps) {
                             ease: "easeInOut"
                           }}
                         />
-                      )}
+                      }
                     </NavLink>
                   </motion.div>
                 ))}

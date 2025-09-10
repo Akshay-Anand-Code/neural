@@ -21,9 +21,13 @@ export default function MatrixRain() {
     const ctx = canvasEl.getContext('2d');
     if (!ctx) return;
 
+    // Use stable references to satisfy TS nullability within closures
+    const canvas = canvasEl;
+    const context = ctx;
+
     const resizeCanvas = () => {
-      canvasEl.width = window.innerWidth;
-      canvasEl.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
 
     resizeCanvas();
@@ -52,12 +56,12 @@ export default function MatrixRain() {
 
     function draw() {
       // Create fade effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+      context.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      context.fillRect(0, 0, canvas.width, canvas.height);
 
       // Draw each stream
       streams.forEach(stream => {
-        ctx.font = `${stream.fontSize}px monospace`;
+        context.font = `${stream.fontSize}px monospace`;
 
         for (let i = 0; i < stream.drops.length; i++) {
           // Randomly change symbol
@@ -74,18 +78,18 @@ export default function MatrixRain() {
           const y = stream.drops[i] * stream.fontSize;
 
           // Add glow effect
-          ctx.shadowBlur = 5;
-          ctx.shadowColor = stream.colors[i];
-          ctx.fillStyle = stream.colors[i];
+          context.shadowBlur = 5;
+          context.shadowColor = stream.colors[i];
+          context.fillStyle = stream.colors[i];
 
           // Draw the symbol
-          ctx.fillText(stream.symbols[i], x, y);
+          context.fillText(stream.symbols[i], x, y);
 
           // Reset shadow for next iteration
-          ctx.shadowBlur = 0;
+          context.shadowBlur = 0;
 
           // Reset drops that go below screen with random delay
-          if (y > canvasEl.height) {
+          if (y > canvas.height) {
             if (Math.random() > 0.99) {
               stream.drops[i] = 0;
               stream.speeds[i] = Math.random() * 0.5 + 0.5;

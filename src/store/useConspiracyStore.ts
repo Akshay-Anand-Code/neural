@@ -32,12 +32,7 @@ interface ConspiracyStore {
   api: ConspiracyAPI;
 }
 
-interface ConspiracyConversation {
-  id: string;
-  title: string;
-  messages: ConspiracyMessage[];
-  createdAt: Date;
-}
+// Use the imported ConspiracyConversation type instead of redefining it locally
 
 const INITIAL_MESSAGES: Omit<ConspiracyMessage, 'id' | 'timestamp'>[] = [
   {

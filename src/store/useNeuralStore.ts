@@ -68,7 +68,7 @@ const INITIAL_STATE = {
     showNodeLabels: true,
     showEnergyLevels: true,
     showTutorialHints: true,
-    difficulty: 'normal'
+    difficulty: 'normal' as const
   },
   stats: {
     nodesHacked: 0,
