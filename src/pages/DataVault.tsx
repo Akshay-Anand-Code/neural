@@ -9,8 +9,8 @@ interface CSVFile {
   name: string;
   size: string;
   lastModified: string;
-  content?: Array<Record<string, string>>;
-  headers?: string[];
+  content: Array<Record<string, string>>;
+  headers: string[];
 }
 
 interface Filter {
