@@ -15,15 +15,15 @@ export default function MatrixRain() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const canvasEl = canvasRef.current;
+    if (!canvasEl) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvasEl.getContext('2d');
     if (!ctx) return;
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvasEl.width = window.innerWidth;
+      canvasEl.height = window.innerHeight;
     };
 
     resizeCanvas();
@@ -53,7 +53,7 @@ export default function MatrixRain() {
     function draw() {
       // Create fade effect
       ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
 
       // Draw each stream
       streams.forEach(stream => {
@@ -85,7 +85,7 @@ export default function MatrixRain() {
           ctx.shadowBlur = 0;
 
           // Reset drops that go below screen with random delay
-          if (y > canvas.height) {
+          if (y > canvasEl.height) {
             if (Math.random() > 0.99) {
               stream.drops[i] = 0;
               stream.speeds[i] = Math.random() * 0.5 + 0.5;

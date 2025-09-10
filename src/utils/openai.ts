@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import type { ChatOptions } from '../types/venice';
-import { API_CONFIG } from '../config/api';
+// import { API_CONFIG } from '../config/api';
 
 class OpenAIService {
   private client?: OpenAI;

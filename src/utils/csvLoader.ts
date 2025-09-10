@@ -27,7 +27,7 @@ export async function loadCSVFile(filename: string, signal?: AbortSignal): Promi
             data: results.data as Array<Record<string, string>>
           });
         },
-        error: (error) => {
+        error: (error: Error) => {
           reject(error);
         }
       });

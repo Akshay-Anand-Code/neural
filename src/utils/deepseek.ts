@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { getEmbeddings } from './embeddings';
-import { enhancePrompt } from './enhancer';
+// import { enhancePrompt } from './enhancer';
 
 export interface ProviderConfig {
   apiKey: string;
@@ -83,8 +83,8 @@ export class DeepSeekProvider {
 
   async chat(message: string, character: AICharacter): Promise<string> {
     try {
-      // Get embeddings for user message
-      const embeddings = await getEmbeddings(message);
+      // Get embeddings for user message (commented out as not currently used)
+      // const embeddings = await getEmbeddings(message);
       const systemPrompt = `
         ${this.generateSystemPrompt(character)}
         

@@ -1,0 +1,15 @@
+[33mcommit addc322decf063f26850a37ad6dcedb5f189846c[m
+Author: SYMBaiEX <solsymbaiex@gmail.com>
+Date:   Tue Jan 21 23:43:25 2025 -0600
+
+    Add files via upload
+
+[1mdiff --git a/.env b/.env[m
+[1mnew file mode 100644[m
+[1mindex 0000000..fcd729f[m
+[1m--- /dev/null[m
+[1m+++ b/.env[m
+[36m@@ -0,0 +1,2 @@[m
+[32m+[m[32mVITE_DEEPSEEK_API_KEY=sk-13105ed6f10e4e1d83197ac047a2d151[m
+[32m+[m[32mVITE_OPENAI_EMBEDDINGS_KEY=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[m
+\ No newline at end of file[m

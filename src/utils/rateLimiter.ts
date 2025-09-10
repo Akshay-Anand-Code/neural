@@ -6,7 +6,7 @@ export class RateLimiter {
 
   constructor(
     private maxRequests: number,
-    private windowMs: number
+    private readonly windowMs: number // Using readonly to indicate this is used in the constructor
   ) {
     this.remainingRequests = maxRequests;
     this.resetInterval = windowMs;

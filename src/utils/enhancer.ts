@@ -5,31 +5,34 @@ interface AICharacter {
   traits: string[];
 }
 
-const SIMILARITY_THRESHOLD = 0.8;
+// Threshold for determining similarity between embeddings (unused currently)
+// const SIMILARITY_THRESHOLD = 0.8;
 
-function cosineSimilarity(a: number[], b: number[]): number {
-  if (a.length !== b.length) return 0;
-  
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-  
-  for (let i = 0; i < a.length; i++) {
-    dotProduct += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
-  }
-  
-  normA = Math.sqrt(normA);
-  normB = Math.sqrt(normB);
-  
-  return dotProduct / (normA * normB);
-}
+// Utility function to calculate cosine similarity between two vectors (unused currently)
+// function cosineSimilarity(a: number[], b: number[]): number {
+//  if (a.length !== b.length) return 0;
+//  
+//  let dotProduct = 0;
+//  let normA = 0;
+//  let normB = 0;
+//  
+//  for (let i = 0; i < a.length; i++) {
+//    dotProduct += a[i] * b[i];
+//    normA += a[i] * a[i];
+//    normB += b[i] * b[i];
+//  }
+//  
+//  normA = Math.sqrt(normA);
+//  normB = Math.sqrt(normB);
+//  
+//  return dotProduct / (normA * normB);
+//}
 
 export function enhancePrompt(
   message: string,
-  embeddings: number[],
-  character: AICharacter
+  // Commented out unused parameters
+  // embeddings: number[],
+  // character: AICharacter
 ): string {
   // For now, we'll just return the original message since we don't have a context database
   // In a full implementation, we would:

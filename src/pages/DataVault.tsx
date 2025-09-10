@@ -143,12 +143,12 @@ export default function DataVault() {
   const filteredData = selectedFile?.content?.filter(row => {
     // Apply search term across all columns
     const matchesSearch = Object.values(row).some(value =>
-      value.toLowerCase().includes(searchTerm.toLowerCase())
+      String(value ?? '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Apply column-specific filters
     const matchesFilters = filters.every(filter =>
-      row[filter.column]?.toLowerCase().includes(filter.value.toLowerCase())
+      String(row[filter.column] ?? '').toLowerCase().includes(filter.value.toLowerCase())
     );
 
     return matchesSearch && matchesFilters;

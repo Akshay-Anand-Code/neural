@@ -13,10 +13,7 @@ interface CSVResponse {
   error?: string;
 }
 
-interface CSVData {
-  headers: string[];
-  data: Array<Record<string, string>>;
-}
+// Removed unused CSVData interface
 
 const rateLimiter = new RateLimiter(60, 60000); // 60 requests per minute
 

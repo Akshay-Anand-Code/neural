@@ -83,8 +83,8 @@ Make it sound natural for verbal delivery, using my speech patterns and catchphr
           To: phoneNumber,
           From: this.fromNumber,
           Twiml: twiml,
-          StatusCallback: `${window.location.origin}/api/call-status`,
-          StatusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+          StatusCallback: `${typeof window !== 'undefined' ? window.location.origin : ''}/api/call-status`,
+          StatusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'].join(','),
           StatusCallbackMethod: 'POST'
         })
       });

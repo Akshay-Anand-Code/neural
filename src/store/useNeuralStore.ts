@@ -4,7 +4,9 @@ import { venice } from '../utils/venice';
 import { puzzles } from '../data/puzzles';
 import { neuralAI } from '../utils/neuralAI';
 
-const INITIAL_NODES = {
+import type { NeuralNode } from '../types/neural';
+
+const INITIAL_NODES: Record<string, NeuralNode> = {
   'core-0': {
     id: 'core-0',
     type: 'input',
@@ -73,7 +75,12 @@ const INITIAL_STATE = {
     puzzlesSolved: 0,
     failedAttempts: 0,
     timeSpent: 0
-  }
+  },
+  currentEnergy: 0,
+  maxEnergy: 100,
+  stability: 100,
+  lastAction: Date.now(),
+  achievements: []
 };
 
 const TUTORIAL_STEPS = [

@@ -1,4 +1,4 @@
-import { motion, MotionProps } from 'framer-motion';
+import { motion } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
 import type { Agent } from '../types/agent';
 
@@ -44,12 +44,12 @@ const buttonAnimations = {
     x: 0,
     scale: 1,
     transition: {
-      type: "spring",
+      type: 'spring',
       stiffness: 300,
       damping: 25
     }
   }
-};
+} as const;
 
 const AgentButton = motion(React.forwardRef<HTMLDivElement, AgentButtonProps>(({ agent, selectedAgent, onSelect }, ref) => {
   return (

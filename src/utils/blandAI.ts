@@ -9,7 +9,8 @@ interface BlandAIConfig {
 class BlandAIService {
   private apiKey: string;
   private orgId: string;
-  private webhookSecret: string;
+  // Using webhookSecret in headers if needed
+  private readonly webhookSecret: string;
   private baseUrl = 'https://api.bland.ai/v1';
   private disabled: boolean;
 
@@ -50,6 +51,8 @@ class BlandAIService {
     return `+${cleanCountryCode}${cleanNumber}`;
   }
 
+  // Commented out as it's not currently used, but keeping for future implementation
+  /*
   private async generateConspiracyTheory(agent: Agent): Promise<string> {
     const prompt = `*whispers in encrypted frequencies* 
     
@@ -77,6 +80,7 @@ class BlandAIService {
 
     return prompt;
   }
+  */
 
   async initiateCall(phoneNumber: string, countryCode: string, agent: Agent): Promise<{ success: boolean; message: string; callId?: string }> {
     try {

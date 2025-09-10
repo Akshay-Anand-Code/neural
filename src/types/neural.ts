@@ -49,7 +49,7 @@ export interface NeuralCommand {
   command: string;
   args: string[];
   timestamp: Date;
-  message: string;
+  message?: string;
   data?: any;
   level?: 'info' | 'success' | 'warning' | 'error' | 'system';
   code?: string;

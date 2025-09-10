@@ -26,13 +26,13 @@ const AgentButton = motion(React.forwardRef<HTMLDivElement, AgentButtonProps>(({
       x: 0,
       scale: 1,
       transition: {
-        type: "spring",
+        type: 'spring',
         stiffness: 300,
         damping: 25,
         delay: index * 0.1
       }
     }
-  };
+  } as const;
 
   return (
     <motion.div {...animations} ref={ref}>

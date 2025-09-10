@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Agent, Message } from '../types/agent';
+import { Agent, Message, AgentStats, StatReward } from '../types/agent';
 import { loadAgents } from '../utils/loadAgents';
 import { venice } from '../utils/venice';
 import { blandAI } from '../utils/blandAI';
@@ -195,7 +195,7 @@ export const useAgentStore = create<AgentStore>((set) => ({
       
       // Show reward message if there are stat increases
       if (reward.message) {
-        await addMessage({
+        await useAgentStore.getState().addMessage({
           id: crypto.randomUUID(),
           agentId: selectedAgent.id,
           content: reward.message,
